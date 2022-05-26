@@ -1,3 +1,4 @@
+import json
 import os
 import sys
 
@@ -24,7 +25,7 @@ class DSL:
         self.ESUser = config["elasticsearchConfig"][DbName]["userName"]
         self.ESPass = config["elasticsearchConfig"][DbName]["password"]
 
-    def setES(self):
+    def getES(self):
         try:
             esClient = Elasticsearch(self.ESurl,
                                      http_auth=(self.ESUser, self.ESPass)
@@ -40,7 +41,7 @@ class DSL:
 
     def getId(self, indexName, ID):
         try:
-            results = self.setES().get(index=indexName, doc_type="_doc", id=ID, request_timeout=20)
+            results = self.getES().get(index=indexName, doc_type="_doc", id=ID, request_timeout=20)
             self.logger.info("查询ID：" + str(ID))
             self.logger.info("查询结果：" + str(results))
             return results
@@ -48,8 +49,17 @@ class DSL:
             self.logger.info(e)
             return "ES查询失败：" + str(e)
 
-    def getBody(self, indexName, body):
-        pass
+    def postSql(self, body):
+        try:
+            results = str(self.getES().sql.query(body={'query': body}))
+
+            self.logger.info("查询Sql：" + str(body))
+            self.logger.info("查询结果：" + str(results))
+
+            return results
+        except Exception as e:
+            self.logger.info(e)
+            return "ES查询失败：" + str(e)
 
 # if __name__ == '__main__':
 #     dsl = DSL().getId("members", 121188119)

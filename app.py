@@ -6,6 +6,8 @@ from loguru import logger
 from util.DSL import DSL
 
 app = Flask(__name__)
+
+
 # root_path = os.path.dirname(__file__)
 # logger.remove()
 # logger.add(str(root_path) + "/logs/log.log")
@@ -20,6 +22,16 @@ def appGetId():
         uid = request.form["uid"]
         # logger.info("Request From:" + str(request))
         dsl = DSL(DbName).getId(index, uid)
+
+        return dsl
+
+
+@app.route('/sqlQuery', methods=['POST', 'GET'])
+def appPostSql():
+    if request.method == 'POST':
+        DbName = request.form["DbName"]
+        sql = request.form["sql"]
+        dsl = DSL(DbName).postSql(sql)
         return dsl
 
 
