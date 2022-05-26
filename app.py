@@ -31,6 +31,7 @@ def appPostSql():
     if request.method == 'POST':
         DbName = request.form["DbName"]
         sql = request.form["sql"]
+        print(sql)
         dsl = DSL(DbName).postSql(sql)
         return dsl
 

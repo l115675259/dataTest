@@ -51,7 +51,7 @@ class DSL:
 
     def postSql(self, body):
         try:
-            results = str(self.getES().sql.query(body={'query': body}))
+            results = self.getES().sql.query(body={'query': body})
 
             self.logger.info("查询Sql：" + str(body))
             self.logger.info("查询结果：" + str(results))
