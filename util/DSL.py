@@ -2,9 +2,12 @@ import json
 import os
 import sys
 
+import pandas
 from elasticsearch import Elasticsearch
-
+from flask import request
+from pandas import *
 from loguru import logger
+import uuid
 
 from util.config import Config
 
@@ -13,10 +16,10 @@ class DSL:
 
     def __init__(self, DbName):
         fn = getattr(sys.modules['__main__'], '__file__')
-        root_path = os.path.dirname(__file__)
+        self.root_path = os.path.dirname(__file__)
 
         logger.remove()
-        logger.add(str(root_path[0:-5]) + "/logs/log.log")
+        logger.add(str(self.root_path[0:-5]) + "/logs/log.log")
         self.logger = logger
 
         self.DbName = DbName
@@ -61,6 +64,34 @@ class DSL:
             self.logger.info(e)
             return "ES查询失败：" + str(e)
 
+    def queryResultsToCsv(self, body):
+        try:
+            results = self.getES().sql.query(body={'query': body})
+            self.logger.info("查询Sql：" + str(body))
+            self.logger.info("查询结果：" + str(results))
+
+            # es结果转DataFrame
+            QrDf = pandas.DataFrame(results["rows"])
+
+            # 从es结果获取列名并赋予
+            columns = []
+            for item in results["columns"]:
+                columns.append(item["name"])
+            QrDf.columns = columns
+            # DataFrame转csv并保存
+            fileName = str(self.root_path[0:-5]) + "/static/csv/" + str(uuid.uuid1()) + ".csv"
+            QrDf.to_csv(fileName)
+            hostname = request.headers.get('Host')
+            results["csvPath"] = "http://" + str(hostname) + "/" + str(fileName.split("/")[-3]+"/"+str(fileName.split("/")[-2]+"/"+str(fileName.split("/")[-1])))
+
+            return results
+        except Exception as e:
+            self.logger.info(e)
+            return "ES查询失败：" + str(e)
+
+
 # if __name__ == '__main__':
-#     dsl = DSL().getId("members", 121188119)
+#     dsl = DSL("yd").getId("members", 121188119)
+#     sql = "select id from members limit 100"
+#     dsl = DSL("md").queryResultsToCsv(sql)
 #     print(dsl)
