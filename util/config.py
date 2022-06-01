@@ -4,7 +4,6 @@ import sys
 
 import consul
 import nacos
-
 from loguru import logger
 
 

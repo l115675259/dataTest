@@ -1,13 +1,11 @@
-import json
 import os
 import sys
+import uuid
 
 import pandas
 from elasticsearch import Elasticsearch
 from flask import request
-from pandas import *
 from loguru import logger
-import uuid
 
 from util.config import Config
 
@@ -78,20 +76,28 @@ class DSL:
             for item in results["columns"]:
                 columns.append(item["name"])
             QrDf.columns = columns
+
             # DataFrame转csv并保存
             fileName = str(self.root_path[0:-5]) + "/static/csv/" + str(uuid.uuid1()) + ".csv"
             QrDf.to_csv(fileName)
-            hostname = request.headers.get('Host')
-            results["csvPath"] = "http://" + str(hostname) + "/" + str(fileName.split("/")[-3]+"/"+str(fileName.split("/")[-2]+"/"+str(fileName.split("/")[-1])))
+
+            # 获取hostname未运行flask则返回127
+            try:
+                hostname = request.headers.get('Host')
+            except Exception:
+                hostname = "127.0.0.1:5000"
+            results["csvPath"] = "http://" + str(hostname) + "/" + str(
+                fileName.split("/")[-3] + "/" + str(fileName.split("/")[-2] + "/" + str(fileName.split("/")[-1])))
+            self.logger.info("csv访问地址：" + results["csvPath"])
 
             return results
         except Exception as e:
             self.logger.info(e)
             return "ES查询失败：" + str(e)
 
-
 # if __name__ == '__main__':
-#     dsl = DSL("yd").getId("members", 121188119)
+#     # dsl = DSL("yd").getId("members", 121188118)
 #     sql = "select id from members limit 100"
-#     dsl = DSL("md").queryResultsToCsv(sql)
+#     dsl = DSL("yd").queryResultsToCsv(sql)
+#     # dsl = DSL("yd").postSql(sql)
 #     print(dsl)
