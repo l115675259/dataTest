@@ -35,7 +35,7 @@ class Config:
 
     def getConsul(self):
         try:
-            client = consul.Consul(host='172.16.227.63', port=5100, scheme='http')
+            client = consul.Consul(host='XXX', port=5100, scheme='http')
             server_config = json.loads(client.kv.get("elasticSearchTest")[1]['Value'].decode('utf-8'))
             self.logger.info(server_config)
             return server_config

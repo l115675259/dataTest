@@ -7,7 +7,6 @@ from loguru import logger
 import app_config
 from rules.base_checker import *
 from util.DSL import DSL
-from util.config import Config
 
 
 class UserCheck:
@@ -55,7 +54,7 @@ class UserCheck:
         rid_info = self.get_item_list(ridList)
         self.logger.info("推荐接口请求参数:" + str(recommendBody))
         self.logger.info("推荐接口请求结果:" + str(rep.json()))
-        self.logger.info("推荐接口下发结果:"+str(ridList))
+        self.logger.info("推荐接口下发结果:" + str(ridList))
 
         issue_map["userAge"] = age_check(user_info, rid_info)
         issue_map["userSex"] = sex_check(user_info, rid_info)
